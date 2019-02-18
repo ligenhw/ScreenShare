@@ -6,7 +6,7 @@
 
     <application>
         <service
-                android:name=".ScreenShareService"
+                android:name=".service.RemoteService"
                 android:process=":remote"
                 android:enabled="true"
                 android:exported="false">

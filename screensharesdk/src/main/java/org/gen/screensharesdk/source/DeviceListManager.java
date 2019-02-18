@@ -1,14 +1,16 @@
-package org.gen.screensharesdk;
+package org.gen.screensharesdk.source;
 
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.RemoteException;
+import org.gen.screensharesdk.DeviceInfo;
+import org.gen.screensharesdk.IScreenShareListener;
 
 import java.util.HashSet;
 import java.util.Set;
 
-class DeviceListManager implements RtspServer.Callback {
+public class DeviceListManager implements RtspServer.Callback {
 
     private Set<DeviceInfo> deviceInfoList = new HashSet<>();
     private IScreenShareListener wl;

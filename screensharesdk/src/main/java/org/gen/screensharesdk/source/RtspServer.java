@@ -1,6 +1,8 @@
-package org.gen.screensharesdk;
+package org.gen.screensharesdk.source;
 
 import android.util.Log;
+import org.gen.screensharesdk.DeviceInfo;
+import org.gen.screensharesdk.ScreenShareException;
 
 import java.io.IOException;
 import java.net.InetAddress;
@@ -9,7 +11,7 @@ import java.net.Socket;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-class RtspServer {
+public class RtspServer {
 
     private static final String TAG = "RtspServer";
     private ServerSocket serverSocket;
@@ -35,7 +37,7 @@ class RtspServer {
                 try {
                     socket = serverSocket.accept();
                 } catch (IOException e) {
-                    e.printStackTrace();
+                    Log.d(TAG, "server accept break : " + e.getMessage());
                     break;
                 }
                 exec.execute(new Runnable() {
@@ -48,9 +50,9 @@ class RtspServer {
         }
     };
 
-    public int start() throws IOException {
+    public int start() throws IOException, ScreenShareException {
         if (serverSocket != null) {
-            throw new RuntimeException("RtspServer already start.");
+            throw new ScreenShareException("RtspServer already start.", new Exception());
         }
 
         serverSocket = new ServerSocket();
