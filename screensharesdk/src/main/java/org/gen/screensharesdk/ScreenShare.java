@@ -4,9 +4,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.ServiceConnection;
-import android.os.IBinder;
-import android.os.Looper;
-import android.os.RemoteException;
+import android.os.*;
 import android.support.annotation.MainThread;
 import android.util.Log;
 
@@ -39,16 +37,53 @@ public final class ScreenShare {
         void onDeviceRemoved(DeviceInfo device);
     }
 
+    public class DeviceListListenerBnBinder extends IScreenShareListener.Stub {
+
+        private final static int MSG_DEVICE_ADD = 0;
+        private final static int MSG_DEVICE_REMOVE = 1;
+
+        private DeviceListListener l;
+        private Handler handler = new Handler(Looper.getMainLooper()) {
+            @Override
+            public void handleMessage(Message msg) {
+                switch (msg.what) {
+                    case MSG_DEVICE_ADD:
+                        DeviceInfo add = (DeviceInfo) msg.obj;
+                        l.onDeviceAdded(add);
+                        break;
+                    case MSG_DEVICE_REMOVE:
+                        DeviceInfo remove = (DeviceInfo) msg.obj;
+                        l.onDeviceRemoved(remove);
+                        break;
+                }
+            }
+        };
+
+        public DeviceListListenerBnBinder(DeviceListListener listener) {
+            l = listener;
+        }
+
+        @Override
+        public void onDeviceAdded(DeviceInfo device) throws RemoteException {
+            handler.obtainMessage(MSG_DEVICE_ADD, device).sendToTarget();
+        }
+
+        @Override
+        public void onDeviceRemoved(DeviceInfo device) throws RemoteException {
+            handler.obtainMessage(MSG_DEVICE_REMOVE, device).sendToTarget();
+        }
+    }
+
     /**
      * start ScreenShareService.
-     * @param context   use to start a service.
-     * @param callback  after init complete call this callback.
+     * @param context use to start a service.
+     * @param callback after init complete call this callback.
      */
     public void init(Context context, final Callback callback) {
         assertMainThread();
 
         Log.d(TAG, "init");
-        if (context == null) {
+        if (context == null || callback == null) {
             throw new NullPointerException("Context can not be null.");
         }
 
@@ -81,7 +116,9 @@ public final class ScreenShare {
 
         Log.d(TAG, "start");
         if (service != null) {
-            return service.start();
+            return service.start(new DeviceListListenerBnBinder(listener));
+        } else {
+            Log.d(TAG, "service is null, do nothing.");
         }
 
         return -1;

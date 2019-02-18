@@ -21,8 +21,9 @@ public class ScreenShareService extends Service {
     class ScreenShareBnBinder extends IScreenShare.Stub {
 
         @Override
-        public int start() throws RemoteException {
+        public int start(IScreenShareListener listener) throws RemoteException {
             try {
+                dm.setListener(listener);
                 return server.start();
             } catch (IOException e) {
                 e.printStackTrace();

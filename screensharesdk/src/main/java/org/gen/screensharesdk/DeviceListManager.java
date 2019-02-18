@@ -3,15 +3,15 @@ package org.gen.screensharesdk;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
+import android.os.RemoteException;
 
-import java.lang.ref.WeakReference;
 import java.util.HashSet;
 import java.util.Set;
 
 class DeviceListManager implements RtspServer.Callback {
 
     private Set<DeviceInfo> deviceInfoList = new HashSet<>();
-    private WeakReference<ScreenShare.DeviceListListener> wl;
+    private IScreenShareListener wl;
 
     private static final int MSG_DEVICE_ADD = 0;
     private static final int MSG_DEVICE_REMOVE = 1;
@@ -21,22 +21,32 @@ class DeviceListManager implements RtspServer.Callback {
         public void handleMessage(Message msg) {
             switch (msg.what) {
                 case MSG_DEVICE_ADD:
-                    if (wl != null && wl.get() != null) {
+                    if (wl != null) {
                         DeviceInfo device = (DeviceInfo) msg.obj;
-                        wl.get().onDeviceAdded(device);
+                        try {
+                            wl.onDeviceAdded(device);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
                     }
                     break;
                 case MSG_DEVICE_REMOVE:
                     if (wl != null) {
                         DeviceInfo device = (DeviceInfo) msg.obj;
-                        wl.get().onDeviceRemoved(device);
+                        try {
+                            wl.onDeviceRemoved(device);
+                        } catch (RemoteException e) {
+                            e.printStackTrace();
+                        }
                     }
                     break;
+                    default:
+                        super.handleMessage(msg);
             }
         }
     };
 
-    public void setListener(WeakReference<ScreenShare.DeviceListListener> listener) {
+    public void setListener(IScreenShareListener listener) {
         wl = listener;
     }
 
