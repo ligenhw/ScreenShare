@@ -2,12 +2,14 @@ package org.gen.screensharesdk;
 
 import android.app.Service;
 import android.content.Intent;
-import android.os.Binder;
 import android.os.IBinder;
+import android.os.RemoteException;
 
-class ScreenShareService extends Service {
+import java.io.IOException;
 
-    private final IBinder mBinder = new LocalBinder();
+public class ScreenShareService extends Service {
+
+    private final IBinder mBinder = new ScreenShareBnBinder();
     private DeviceListManager dm = new DeviceListManager();
     private RtspServer server = new RtspServer(dm);
 
@@ -16,9 +18,41 @@ class ScreenShareService extends Service {
         return mBinder;
     }
 
-    class LocalBinder extends Binder {
-        ScreenShareService getService() {
-            return ScreenShareService.this;
+    class ScreenShareBnBinder extends IScreenShare.Stub {
+
+        @Override
+        public int start() throws RemoteException {
+            try {
+                return server.start();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+
+            return -1;
+        }
+
+        @Override
+        public void puase() throws RemoteException {
+
+        }
+
+        @Override
+        public void resume() throws RemoteException {
+
+        }
+
+        @Override
+        public void stop() throws RemoteException {
+            try {
+                server.stop();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+
+        @Override
+        public void destory() throws RemoteException {
+            ScreenShareService.this.stopSelf();
         }
     }
 

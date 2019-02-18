@@ -6,11 +6,10 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.IBinder;
 import android.os.Looper;
+import android.os.RemoteException;
 import android.support.annotation.MainThread;
 import android.util.Log;
 
-import java.io.IOException;
-import java.lang.ref.WeakReference;
 
 /**
  * the api must invoke in main thread.
@@ -29,7 +28,7 @@ public final class ScreenShare {
         return INSTANCE;
     }
 
-    private ScreenShareService service;
+    private IScreenShare service;
 
     public interface Callback {
         void onComplete();
@@ -60,7 +59,7 @@ public final class ScreenShare {
             @Override
             public void onServiceConnected(ComponentName name, IBinder binder) {
                 Log.d(TAG, "service connected");
-                service = ((ScreenShareService.LocalBinder) binder).getService();
+                service = IScreenShare.Stub.asInterface(binder);
                 callback.onComplete();
             }
 
@@ -77,60 +76,52 @@ public final class ScreenShare {
      *
      * @return port
      */
-    public int start(DeviceListListener listener) {
+    public int start(DeviceListListener listener) throws RemoteException {
         assertMainThread();
 
         Log.d(TAG, "start");
-        try {
-            if (service != null) {
-                WeakReference<DeviceListListener> l = new WeakReference<>(listener);
-                service.getDm().setListener(l);
-                return service.getServer().start();
-            } else {
-                Log.d(TAG, "service is null, do nothing.");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (service != null) {
+            return service.start();
         }
 
         return -1;
     }
 
-    public void pause() {
-
+    public void pause() throws RemoteException {
+        if (service != null) {
+            service.puase();
+        }
     }
 
-    public void resume() {
-
+    public void resume() throws RemoteException {
+        if (service != null) {
+            service.resume();
+        }
     }
 
     /**
      * close server socket.
      */
-    public void stop() {
+    public void stop() throws RemoteException {
         assertMainThread();
 
         Log.d(TAG, "stop");
-        try {
-            if (service != null) {
-                service.getServer().stop();
-            } else {
-                Log.d(TAG, "service is null, do nothing.");
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (service != null) {
+            service.stop();
+        } else {
+            Log.d(TAG, "service is null, do nothing.");
         }
     }
 
     /**
      * destory service.
      */
-    public void destory() {
+    public void destory() throws RemoteException {
         assertMainThread();
 
         Log.d(TAG, "destory");
         if (service != null) {
-            service.stopSelf();
+            service.destory();
             service = null;
         } else {
             Log.d(TAG, "service is null, do nothing.");

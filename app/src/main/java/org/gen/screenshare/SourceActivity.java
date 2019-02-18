@@ -2,10 +2,12 @@ package org.gen.screenshare;
 
 import android.app.Activity;
 import android.os.Bundle;
+import android.os.RemoteException;
 import android.util.Log;
 import android.view.View;
 import android.widget.ArrayAdapter;
 import android.widget.ListView;
+import android.widget.TextView;
 import org.gen.screensharesdk.DeviceInfo;
 import org.gen.screensharesdk.ScreenShare;
 
@@ -16,6 +18,8 @@ public class SourceActivity extends Activity implements
     private ScreenShare ss;
     private ListView mListView;
     private ArrayAdapter<DeviceInfo> adapter;
+
+    private TextView textView;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -36,6 +40,8 @@ public class SourceActivity extends Activity implements
         adapter = new ArrayAdapter<>(this,
                 android.R.layout.simple_list_item_1);
         mListView.setAdapter(adapter);
+
+        textView = findViewById(R.id.result);
     }
 
     @Override
@@ -47,16 +53,29 @@ public class SourceActivity extends Activity implements
     }
 
     public void destoryClick(View view) {
-        ss.destory();
+        try {
+            ss.destory();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     public void start(View view) {
         // must invoke after onComplete.
-        ss.start(this);
+        try {
+            int port = ss.start(this);
+            textView.setText("server listening at " + port);
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     public void stop(View view) {
-        ss.stop();
+        try {
+            ss.stop();
+        } catch (RemoteException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override

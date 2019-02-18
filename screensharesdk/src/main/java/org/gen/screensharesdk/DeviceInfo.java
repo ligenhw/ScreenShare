@@ -1,12 +1,48 @@
 package org.gen.screensharesdk;
 
+import android.os.Parcel;
+import android.os.Parcelable;
+
 import java.util.Objects;
 
-public class DeviceInfo {
+public class DeviceInfo implements Parcelable {
     private String ip;
     private int port;
     private String mac;
     private State state;
+
+    public DeviceInfo() {
+    }
+
+    protected DeviceInfo(Parcel in) {
+        ip = in.readString();
+        port = in.readInt();
+        mac = in.readString();
+    }
+
+    public static final Creator<DeviceInfo> CREATOR = new Creator<DeviceInfo>() {
+        @Override
+        public DeviceInfo createFromParcel(Parcel in) {
+            return new DeviceInfo(in);
+        }
+
+        @Override
+        public DeviceInfo[] newArray(int size) {
+            return new DeviceInfo[size];
+        }
+    };
+
+    @Override
+    public int describeContents() {
+        return 0;
+    }
+
+    @Override
+    public void writeToParcel(Parcel dest, int flags) {
+        dest.writeString(ip);
+        dest.writeInt(port);
+        dest.writeString(mac);
+    }
 
     public enum State {
         UNCONN, CONNECTING, CONNECTED
