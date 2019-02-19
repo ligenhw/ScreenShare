@@ -3,9 +3,11 @@ package org.gen.screensharesdk.source;
 import android.content.Context;
 import android.content.Intent;
 import android.os.RemoteException;
+import android.util.Log;
 import org.gen.screensharesdk.DeviceInfo;
 import org.gen.screensharesdk.IScreenShareService;
 import org.gen.screensharesdk.ScreenShareException;
+import org.gen.screensharesdk.Wfd;
 import org.gen.screensharesdk.service.AbsServiceManager;
 import org.gen.screensharesdk.service.RemoteService;
 
@@ -25,6 +27,7 @@ public final class SourceManager extends AbsServiceManager {
 
     private SourceManager(Context context) {
         super(context);
+        Wfd.init();
     }
 
     public static SourceManager getInstance(Context context) {
@@ -79,7 +82,7 @@ public final class SourceManager extends AbsServiceManager {
         try {
             getService().puase();
         } catch (RemoteException e) {
-            throw new ScreenShareException("pause()", e);
+            throw new ScreenShareException("listen()", e);
         }
     }
 
